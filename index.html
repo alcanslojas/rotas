@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Alcans - Sistema Visual Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <title>Alcans - Sistema Mobile Ready</title>
     <script src="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -16,7 +16,6 @@
             --alcans-red: #ff3d00;
             --excel-green: #217346;
             
-            /* TEMA PADRÃO (DARK) */
             --bg-main: #000000;
             --bg-panel: #121212;
             --bg-element: #1e1e1e;
@@ -28,7 +27,6 @@
             --radius-pill: 50px;
         }
 
-        /* TEMA CLARO */
         body.light-theme {
             --bg-main: #f0f2f5;
             --bg-panel: #ffffff;
@@ -51,7 +49,7 @@
         header { 
             background: var(--bg-main); padding: 15px 25px; 
             display: flex; justify-content: space-between; align-items: center; 
-            z-index: 20; border-bottom: 1px solid var(--border-color);
+            z-index: 20; border-bottom: 1px solid var(--border-color); flex-shrink: 0;
         }
 
         .theme-toggle {
@@ -61,22 +59,18 @@
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             margin-left: 10px; transition: 0.3s;
         }
-        .theme-toggle:hover { background: var(--bg-hover); color: var(--alcans-orange); }
 
         /* NAVEGADOR */
         .week-navigator {
             display: flex; align-items: center; justify-content: center; gap: 15px;
-            background: var(--bg-panel); padding: 10px; border-bottom: 1px solid var(--border-color); z-index: 15;
+            background: var(--bg-panel); padding: 10px; border-bottom: 1px solid var(--border-color); z-index: 15; flex-shrink: 0;
         }
         .week-display { font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-width: 150px; }
         .week-dates { font-size: 11px; color: var(--alcans-orange); font-weight: 400; margin-top: 2px; }
         .btn-nav-arrow { background: var(--bg-element); color: var(--text-main); border: 1px solid var(--border-color); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-nav-arrow:hover { background: var(--alcans-orange); color: white; border-color: var(--alcans-orange); }
-
+        
         .top-actions { display: flex; gap: 10px; margin-left: 20px; }
         .btn-top { font-size: 10px; padding: 6px 14px; background: var(--bg-element); border: 1px solid var(--border-color); color: var(--text-sec); border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; }
-        .btn-top:hover { border-color: var(--alcans-orange); color: var(--alcans-orange); }
-        .btn-excel:hover { border-color: var(--excel-green); color: var(--excel-green); }
 
         .btn-overview {
             background: var(--bg-element); color: var(--text-main); border: 1px solid var(--border-color);
@@ -93,7 +87,6 @@
         .dash-header { background: var(--bg-panel); padding: 15px; border-radius: 10px; text-align: center; font-weight: 800; color: var(--text-sec); font-size: 12px; border: 1px solid var(--border-color); }
         .colab-row-header { background: var(--bg-element); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text-main); border-left: 4px solid var(--alcans-orange); border: 1px solid var(--border-color); }
         .dash-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 15px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-height: 80px; position: relative; transition: 0.2s; }
-        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow-color); }
         .status-active { border-color: var(--alcans-green); background: rgba(0, 200, 83, 0.05); }
         .card-count { font-size: 24px; font-weight: 800; color: var(--text-main); }
         .status-empty { color: var(--text-sec); font-size: 11px; font-weight: 600; }
@@ -102,56 +95,43 @@
         .badge-saved { background: var(--alcans-green); box-shadow: 0 0 5px var(--alcans-green); }
 
         /* LISTAS E SIDEBAR */
-        .nav-container { background: var(--bg-main); padding: 10px 20px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; z-index: 10; }
+        .nav-container { background: var(--bg-main); padding: 10px 20px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; z-index: 10; flex-shrink: 0; }
         .tab-colab { padding: 8px 18px; background: var(--bg-element); border: 1px solid var(--border-color); color: var(--text-sec); border-radius: var(--radius-pill); cursor: pointer; font-weight: 700; font-size: 11px; white-space: nowrap; }
         .tab-colab.active { background: var(--alcans-orange); color: white; border-color: var(--alcans-orange); }
-        .nav-days { display: flex; padding: 10px 20px; gap: 8px; background: var(--bg-main); border-bottom: 1px solid var(--border-color); overflow-x: auto; z-index: 10; }
+        .nav-days { display: flex; padding: 10px 20px; gap: 8px; background: var(--bg-main); border-bottom: 1px solid var(--border-color); overflow-x: auto; z-index: 10; flex-shrink: 0; }
         .btn-day { padding: 8px 16px; background: transparent; border: 2px solid var(--border-color); color: var(--text-sec); border-radius: var(--radius-pill); cursor: pointer; font-size: 10px; font-weight: 800; }
         .btn-day.active { background: var(--bg-panel); color: var(--text-main); border-color: var(--text-main); }
 
         .main { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; position: relative; }
-        .sidebar { background: var(--bg-panel); display: flex; flex-direction: column; margin: 10px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); z-index: 5; }
+        
+        .sidebar { 
+            background: var(--bg-panel); display: flex; flex-direction: column; 
+            margin: 10px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); 
+            z-index: 5; 
+        }
+        
         .stats { padding: 20px; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); }
         .stats-time { font-size: 32px; font-weight: 900; color: var(--alcans-orange); }
         .city-list { padding: 15px; overflow-y: auto; flex: 1; }
 
-        .city-item { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 8px; background: var(--bg-element); border-radius: var(--radius-pill); border: 1px solid var(--border-color); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-main); transition: 0.2s; }
-        .city-item:hover { background: var(--bg-hover); border-color: var(--text-sec); }
+        .city-item { display: flex; align-items: center; padding: 14px 16px; margin-bottom: 8px; background: var(--bg-element); border-radius: var(--radius-pill); border: 1px solid var(--border-color); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-main); transition: 0.2s; }
         .city-item.fixed { border-left: 6px solid var(--alcans-orange); border-radius: 12px; }
         .city-item.locked { opacity: 0.5; pointer-events: none; }
         .city-item.extra { border-style: dashed; border-color: var(--text-sec); opacity: 0.8; }
         
-        /* --- ESTILIZAÇÃO DO CHECKBOX CIRCULAR (NOVO) --- */
         .city-item input[type="checkbox"] { 
             appearance: none; -webkit-appearance: none;
             width: 22px; height: 22px; 
             border: 2px solid var(--text-sec); 
-            border-radius: 50%; /* Faz virar círculo */
+            border-radius: 50%;
             margin-right: 12px; 
             display: grid; place-content: center; 
             flex-shrink: 0; cursor: pointer; transition: 0.2s ease;
             background-color: transparent;
         }
-
-        /* Checkmark (símbolo) dentro do círculo */
-        .city-item input[type="checkbox"]::before {
-            content: "\f00c"; /* Código do check do FontAwesome */
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            color: white;
-            font-size: 12px;
-            transform: scale(0);
-            transition: 0.2s ease;
-        }
-
-        /* Estado Selecionado */
-        .city-item input[type="checkbox"]:checked { 
-            background-color: var(--alcans-orange); 
-            border-color: var(--alcans-orange);
-        }
-        .city-item input[type="checkbox"]:checked::before { 
-            transform: scale(1); 
-        }
+        .city-item input[type="checkbox"]::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; color: white; font-size: 12px; transform: scale(0); transition: 0.2s ease; }
+        .city-item input[type="checkbox"]:checked { background-color: var(--alcans-orange); border-color: var(--alcans-orange); }
+        .city-item input[type="checkbox"]:checked::before { transform: scale(1); }
 
         .extra-separator { margin: 15px 0 10px 0; padding: 10px; border-top: 1px solid var(--border-color); color: var(--text-sec); font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
         .extra-container { display: none; } .extra-container.open { display: block; }
@@ -171,10 +151,52 @@
         #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); padding: 12px 30px; border-radius: var(--radius-pill); font-weight: 700; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.4s; display: flex; gap: 10px; }
         #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
         .toast-success { background: var(--alcans-green); color: black; } .toast-delete { background: var(--alcans-red); color: white; }
-
         .marker-svg { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .marker-svg svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         .marker-svg .marker-label { background: var(--bg-panel); color: var(--text-main); padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-bottom: 2px; border: 1px solid var(--alcans-orange); white-space: nowrap; box-shadow: 0 2px 5px var(--shadow-color); }
+
+        /* --- CSS ESPECÍFICO PARA MOBILE --- */
+        #mobile-toggle-view { display: none; } /* Oculto no desktop */
+
+        @media (max-width: 768px) {
+            header { padding: 10px 15px; }
+            .week-navigator { flex-wrap: wrap; padding: 10px 5px; gap: 8px; }
+            .top-actions { width: 100%; justify-content: center; margin: 0; margin-top: 5px; }
+            .week-display { min-width: 120px; }
+            
+            /* Layout Mobile: Mapa 100%, Sidebar vira Overlay */
+            .main { display: block; position: relative; }
+            
+            .sidebar { 
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                margin: 0; border-radius: 0; border: none; z-index: 50;
+                display: none; /* Escondido por padrão no mobile */
+            }
+            .sidebar.mobile-visible { display: flex; } /* Classe para mostrar */
+            
+            #map { width: 100%; height: 100%; border-radius: 0; margin: 0; }
+            
+            /* Ajuste Dashboard */
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .dash-header { display: none; } /* Esconde cabeçalho da tabela no mobile */
+            .colab-row-header { margin-top: 15px; }
+
+            /* Controles Flutuantes */
+            #floating-controls { bottom: 90px; right: 20px; gap: 10px; }
+            #confirm-modal { right: 50%; transform: translateX(50%) translateY(20px); bottom: 160px; width: 90%; }
+            #confirm-modal.show { transform: translateX(50%) translateY(0); }
+
+            /* Botão Toggle Mobile */
+            #mobile-toggle-view {
+                display: flex; align-items: center; justify-content: center; gap: 10px;
+                position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+                background: var(--text-main); color: var(--bg-main);
+                padding: 12px 24px; border-radius: 30px;
+                font-weight: 800; font-size: 12px; text-transform: uppercase;
+                box-shadow: 0 10px 30px var(--shadow-color);
+                z-index: 200; border: none; cursor: pointer;
+            }
+        }
     </style>
 </head>
 <body>
@@ -183,7 +205,7 @@
     <div style="font-weight:900; color:var(--alcans-orange); font-size: 20px;">ALCANS <span style="font-weight:300; color:var(--text-main)">SYSTEM</span></div>
     <div style="display:flex; align-items:center;">
         <button class="btn-overview" id="btnToggleOverview" onclick="toggleOverview()">
-            <i class="fas fa-th-large"></i> Visão Geral
+            <i class="fas fa-th-large"></i> <span style="display:none; @media(min-width:769px){display:inline}">Visão Geral</span>
         </button>
         <button class="theme-toggle" onclick="toggleTheme()" title="Alternar Tema">
             <i id="themeIcon" class="fas fa-moon"></i>
@@ -208,7 +230,11 @@
 <div class="nav-days" id="dayNav"></div>
 
 <div class="main">
-    <aside class="sidebar">
+    <button id="mobile-toggle-view" onclick="toggleMobileView()">
+        <i class="fas fa-list-ul"></i> <span>VER LISTA</span>
+    </button>
+
+    <aside class="sidebar" id="sidebarPanel">
         <div class="stats">
             <div id="totalTime" class="stats-time">0h 00m</div>
             <div id="totalKm" style="color: var(--text-sec); font-size: 13px;">0.0 km</div>
@@ -218,7 +244,7 @@
     
     <div id="map">
         <div id="overview-panel">
-            <h2 style="text-align:center; color:var(--text-main); margin-bottom:30px">RESUMO DA ESCALA SEMANAL</h2>
+            <h2 style="text-align:center; color:var(--text-main); margin-bottom:30px">RESUMO DA ESCALA</h2>
             <div class="dashboard-grid" id="dashboardGrid"></div>
         </div>
 
@@ -248,7 +274,6 @@
     let activeWeek = getWeekRange(0);
     let db = JSON.parse(localStorage.getItem('alcans_system_3d_v1')) || {};
     
-    // ESTILOS COM SUPORTE A 3D
     const MAP_STYLE_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
     const MAP_STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
 
@@ -271,18 +296,30 @@
     let currentColab = "1", currentDay = "SEGUNDA", currentSelection = [], isLocked = false, extraExpanded = false;
     let currentTheme = localStorage.getItem('alcans_theme') || 'dark';
 
-    // Inicializa Mapa COM PITCH (3D) ATIVADO
     const map = new maplibregl.Map({ 
         container: 'map', 
         style: currentTheme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
-        center: [-47.3, -21.2], 
-        zoom: 9, 
-        pitch: 60, // AQUI ESTÁ O SEGREDO DO 3D
-        bearing: -10, // Leve rotação para dar mais profundidade
-        antialias: true // Melhora a qualidade das bordas no 3D
+        center: [-47.3, -21.2], zoom: 9, pitch: 60, bearing: -10, antialias: true 
     });
 
-    // --- FUNÇÕES DE TEMA E 3D ---
+    // --- FUNÇÕES MOBILE ---
+    let isMobileListView = false;
+    function toggleMobileView() {
+        const sidebar = document.getElementById('sidebarPanel');
+        const btn = document.getElementById('mobile-toggle-view');
+        
+        isMobileListView = !isMobileListView;
+        
+        if (isMobileListView) {
+            sidebar.classList.add('mobile-visible');
+            btn.innerHTML = '<i class="fas fa-map"></i> <span>VER MAPA</span>';
+        } else {
+            sidebar.classList.remove('mobile-visible');
+            btn.innerHTML = '<i class="fas fa-list-ul"></i> <span>VER LISTA</span>';
+            map.resize(); // Garante que o mapa renderize corretamente ao voltar
+        }
+    }
+
     function initTheme() {
         if (currentTheme === 'light') {
             document.body.classList.add('light-theme');
@@ -307,14 +344,9 @@
             map.setStyle(MAP_STYLE_LIGHT);
         }
         localStorage.setItem('alcans_theme', currentTheme);
-        
-        // Garante que o 3D e a rota sejam redesenhados ao trocar o tema
-        map.once('style.load', () => {
-            updateMapRoute();
-        });
+        map.once('style.load', () => { updateMapRoute(); });
     }
 
-    // --- FUNÇÕES GERAIS ---
     function getWeekRange(offset) {
         const today = new Date();
         const currentDay = today.getDay();
@@ -353,32 +385,23 @@
     let markers = [];
     async function updateMapRoute() {
         markers.forEach(m => m.remove()); markers = [];
-
         currentSelection.forEach(c => {
             if(coords[c]) {
                 const el = document.createElement('div'); el.className = 'marker-svg';
-                el.innerHTML = `
-                    <div class="marker-label">${c}</div>
-                    <svg viewBox="0 0 24 24" fill="#FE5000">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>`;
+                el.innerHTML = `<div class="marker-label">${c}</div><svg viewBox="0 0 24 24" fill="#FE5000"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
                 markers.push(new maplibregl.Marker({element: el, anchor: 'bottom'}).setLngLat(coords[c]).addTo(map));
             }
         });
-
         if (currentSelection.length < 2) { 
             if(map.getSource('route')) map.getSource('route').setData({type:'FeatureCollection',features:[]}); 
             document.getElementById('totalTime').innerText="0h 00m"; document.getElementById('totalKm').innerText="0.0 km"; 
             return; 
         }
-
         const validCoords = currentSelection.filter(c => coords[c]).map(c => coords[c]);
         const waypointsStr = validCoords.map(c => `${c[0]},${c[1]}`).join(';');
-        
         try {
             const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${waypointsStr}?overview=full&geometries=geojson`);
             const data = await res.json();
-            
             if(data.routes && data.routes[0]) {
                 const r = data.routes[0];
                 updateRouteLayer(r.geometry);
@@ -395,16 +418,8 @@
     }
 
     function updateRouteLayer(geo) {
-        if(map.getSource('route')) {
-            map.getSource('route').setData(geo);
-        } else {
-            map.addSource('route', { type: 'geojson', data: geo });
-            map.addLayer({
-                id: 'route', type: 'line', source: 'route',
-                layout: { 'line-join': 'round', 'line-cap': 'round' },
-                paint: { 'line-color': '#FE5000', 'line-width': 5, 'line-opacity': 0.9 }
-            });
-        }
+        if(map.getSource('route')) { map.getSource('route').setData(geo); } 
+        else { map.addSource('route', { type: 'geojson', data: geo }); map.addLayer({ id: 'route', type: 'line', source: 'route', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': '#FE5000', 'line-width': 5, 'line-opacity': 0.9 } }); }
     }
 
     function changeWeek(dir) { currentWeekOffset += dir; updateWeekDisplay(); }
@@ -414,7 +429,7 @@
     function clonePreviousWeek() { const cur = activeWeek.id; const prev = getWeekRange(currentWeekOffset - 1).id; if (!db[prev]) { showToast("Sem dados anteriores.", "delete"); return; } if(!confirm("Copiar semana anterior?")) return; db[cur] = JSON.parse(JSON.stringify(db[prev])); localStorage.setItem('alcans_system_3d_v1', JSON.stringify(db)); loadState(); updateUI(); showToast("Cópia realizada!", "success"); }
     function exportToExcel() { const w = activeWeek.id; const d = []; Object.keys(colabs).forEach(cId => { const cData = db[w]?.[cId] || {}; days.forEach(day => { const r = cData[day] || ["-"]; if(r.length > 1) d.push({ "Colaborador": colabs[cId].nome, "Semana": activeWeek.display, "Dia": day, "Rota": r.join(" > "), "Cidades": r.length - 1 }); }); }); if (d.length === 0) { showToast("Sem dados.", "delete"); return; } const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Geral"); XLSX.writeFile(wb, `Alcans_${w}.xlsx`); showToast("Excel baixado!", "success"); }
     
-    function toggleOverview() { const p = document.getElementById('overview-panel'); const b = document.getElementById('btnToggleOverview'); if (p.classList.contains('active')) { p.classList.remove('active'); b.classList.remove('active'); b.innerHTML = '<i class="fas fa-th-large"></i> Visão Geral'; } else { renderDashboard(); p.classList.add('active'); b.classList.add('active'); b.innerHTML = '<i class="fas fa-times"></i> Fechar Visão'; } }
+    function toggleOverview() { const p = document.getElementById('overview-panel'); const b = document.getElementById('btnToggleOverview'); if (p.classList.contains('active')) { p.classList.remove('active'); b.classList.remove('active'); b.innerHTML = '<i class="fas fa-th-large"></i> <span style="display:none; @media(min-width:769px){display:inline}">Visão Geral</span>'; } else { renderDashboard(); p.classList.add('active'); b.classList.add('active'); b.innerHTML = '<i class="fas fa-times"></i> <span style="display:none; @media(min-width:769px){display:inline}">Fechar Visão</span>'; } }
     function renderDashboard() { const g = document.getElementById('dashboardGrid'); g.innerHTML = ''; const w = activeWeek.id; g.innerHTML += `<div class="dash-header">COLAB</div>`; days.forEach(d => g.innerHTML += `<div class="dash-header">${d.substring(0,3)}</div>`); Object.keys(colabs).forEach(cId => { g.innerHTML += `<div class="colab-row-header"><i class="fas fa-user-circle"></i> ${colabs[cId].nome.split(' ')[0]}</div>`; days.forEach(day => { const r = db[w]?.[cId]?.[day]; const has = r && r.length > 0; g.innerHTML += has ? `<div class="dash-card status-active" onclick="jumpTo('${cId}', '${day}')"><div class="status-badge badge-saved"></div><div class="card-count">${r.length-1}</div><div class="card-label">Cidades</div></div>` : `<div class="dash-card" onclick="jumpTo('${cId}', '${day}')"><span class="status-empty">-</span></div>`; }); }); }
     function jumpTo(cId, day) { document.getElementById('overview-panel').classList.remove('active'); document.getElementById('btnToggleOverview').classList.remove('active'); document.getElementById('btnToggleOverview').innerHTML = '<i class="fas fa-th-large"></i> Visão Geral'; currentColab = cId; currentDay = day; loadState(); updateUI(); }
     
