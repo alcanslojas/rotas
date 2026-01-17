@@ -2,157 +2,193 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Alcans - Sistema de Gestão</title>
+    <title>Alcans - Sistema Visual Pro</title>
     <script src="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
     <style>
+        /* --- CORES E VARIÁVEIS --- */
         :root {
             --alcans-orange: #FE5000;
             --alcans-green: #00c853; 
             --alcans-red: #ff3d00;
+            --excel-green: #217346;
+            
+            /* TEMA PADRÃO (DARK) */
             --bg-main: #000000;
             --bg-panel: #121212;
             --bg-element: #1e1e1e;
-            --text-gray: #888888;
+            --bg-hover: #2a2a2a;
+            --text-main: #ffffff;
+            --text-sec: #888888;
+            --border-color: #222222;
+            --shadow-color: rgba(0,0,0,0.5);
             --radius-pill: 50px;
+        }
+
+        /* TEMA CLARO */
+        body.light-theme {
+            --bg-main: #f0f2f5;
+            --bg-panel: #ffffff;
+            --bg-element: #f8f9fa;
+            --bg-hover: #e4e6eb;
+            --text-main: #1c1e21;
+            --text-sec: #65676b;
+            --border-color: #dadde1;
+            --shadow-color: rgba(0,0,0,0.1);
         }
 
         body { 
             font-family: 'Segoe UI', sans-serif; margin: 0; 
-            background: var(--bg-main); color: white; 
+            background: var(--bg-main); color: var(--text-main); 
             height: 100vh; display: flex; flex-direction: column; 
-            overflow: hidden; 
+            overflow: hidden; transition: background 0.3s, color 0.3s;
         }
         
         /* HEADER */
         header { 
             background: var(--bg-main); padding: 15px 25px; 
             display: flex; justify-content: space-between; align-items: center; 
-            z-index: 10; border-bottom: 1px solid #222;
+            z-index: 20; border-bottom: 1px solid var(--border-color);
         }
 
-        /* BOTÃO VISÃO GERAL */
+        .theme-toggle {
+            background: var(--bg-element); color: var(--text-main);
+            border: 1px solid var(--border-color);
+            width: 36px; height: 36px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            margin-left: 10px; transition: 0.3s;
+        }
+        .theme-toggle:hover { background: var(--bg-hover); color: var(--alcans-orange); }
+
+        /* NAVEGADOR */
+        .week-navigator {
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            background: var(--bg-panel); padding: 10px; border-bottom: 1px solid var(--border-color); z-index: 15;
+        }
+        .week-display { font-size: 14px; font-weight: 700; color: var(--text-main); display: flex; flex-direction: column; align-items: center; min-width: 150px; }
+        .week-dates { font-size: 11px; color: var(--alcans-orange); font-weight: 400; margin-top: 2px; }
+        .btn-nav-arrow { background: var(--bg-element); color: var(--text-main); border: 1px solid var(--border-color); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-nav-arrow:hover { background: var(--alcans-orange); color: white; border-color: var(--alcans-orange); }
+
+        .top-actions { display: flex; gap: 10px; margin-left: 20px; }
+        .btn-top { font-size: 10px; padding: 6px 14px; background: var(--bg-element); border: 1px solid var(--border-color); color: var(--text-sec); border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 700; }
+        .btn-top:hover { border-color: var(--alcans-orange); color: var(--alcans-orange); }
+        .btn-excel:hover { border-color: var(--excel-green); color: var(--excel-green); }
+
         .btn-overview {
-            background: #222; color: white; border: 1px solid #444;
+            background: var(--bg-element); color: var(--text-main); border: 1px solid var(--border-color);
             padding: 8px 16px; border-radius: 20px; cursor: pointer;
             font-size: 11px; font-weight: 700; text-transform: uppercase;
             display: flex; align-items: center; gap: 8px; transition: 0.3s;
         }
-        .btn-overview:hover, .btn-overview.active {
-            background: var(--alcans-orange); border-color: var(--alcans-orange);
-            box-shadow: 0 0 15px rgba(254, 80, 0, 0.3);
-        }
+        .btn-overview.active { background: var(--alcans-orange); border-color: var(--alcans-orange); color: white; }
 
-        /* DASHBOARD OVERLAY */
-        #overview-panel {
-            position: absolute; top: 120px; left: 0; width: 100%; bottom: 0;
-            background: var(--bg-main); z-index: 500;
-            display: none; padding: 20px; box-sizing: border-box; overflow-y: auto;
-            animation: fadeIn 0.3s ease;
-        }
+        /* DASHBOARD */
+        #overview-panel { position: absolute; top: 120px; left: 0; width: 100%; bottom: 0; background: var(--bg-main); z-index: 500; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         #overview-panel.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .dashboard-grid {
-            display: grid; grid-template-columns: 200px repeat(6, 1fr); gap: 10px;
-            max-width: 1400px; margin: 0 auto;
-        }
-        .dash-header {
-            background: #181818; padding: 15px; border-radius: 10px;
-            text-align: center; font-weight: 800; color: #666; font-size: 12px;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .colab-row-header {
-            background: #1e1e1e; padding: 20px; border-radius: 15px;
-            display: flex; align-items: center; gap: 10px;
-            font-weight: 700; color: white; border-left: 4px solid var(--alcans-orange);
-        }
-        .dash-card {
-            background: #111; border: 1px solid #222; border-radius: 15px;
-            padding: 15px; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 80px; position: relative;
-        }
-        .dash-card:hover { border-color: #555; background: #1a1a1a; transform: translateY(-2px); }
-        .status-empty { color: #444; font-size: 11px; font-weight: 600; }
+        .dashboard-grid { display: grid; grid-template-columns: 200px repeat(6, 1fr); gap: 10px; max-width: 1400px; margin: 0 auto; }
+        .dash-header { background: var(--bg-panel); padding: 15px; border-radius: 10px; text-align: center; font-weight: 800; color: var(--text-sec); font-size: 12px; border: 1px solid var(--border-color); }
+        .colab-row-header { background: var(--bg-element); padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text-main); border-left: 4px solid var(--alcans-orange); border: 1px solid var(--border-color); }
+        .dash-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 15px; padding: 15px; cursor: pointer; display: flex; flex-direction: column; align-items: center; min-height: 80px; position: relative; transition: 0.2s; }
+        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow-color); }
         .status-active { border-color: var(--alcans-green); background: rgba(0, 200, 83, 0.05); }
-        .card-count { font-size: 24px; font-weight: 800; color: white; }
-        .card-label { font-size: 10px; color: #888; text-transform: uppercase; margin-top: 4px; }
+        .card-count { font-size: 24px; font-weight: 800; color: var(--text-main); }
+        .status-empty { color: var(--text-sec); font-size: 11px; font-weight: 600; }
+        .card-label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-top: 4px; }
         .status-badge { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
         .badge-saved { background: var(--alcans-green); box-shadow: 0 0 5px var(--alcans-green); }
 
-        /* NAVEGADOR */
-        .week-navigator { display: flex; align-items: center; justify-content: center; gap: 15px; background: #181818; padding: 10px; border-bottom: 1px solid #333; }
-        .week-display { font-size: 14px; font-weight: 700; color: white; display: flex; flex-direction: column; align-items: center; min-width: 150px; }
-        .week-dates { font-size: 11px; color: var(--alcans-orange); font-weight: 400; margin-top: 2px; }
-        .btn-nav-arrow { background: #2a2a2a; color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-nav-arrow:hover { background: var(--alcans-orange); }
-        .top-actions { display: flex; gap: 10px; margin-left: 20px; }
-        .btn-top { font-size: 10px; padding: 6px 14px; background: #2a2a2a; border: 1px solid #444; color: #aaa; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .btn-top:hover { border-color: var(--alcans-orange); color: white; }
-        .btn-excel { border-color: #217346; color: #217346; } .btn-excel:hover { background: #217346; color: white; border-color: #217346; }
-
-        .nav-container { background: var(--bg-main); padding: 10px 20px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .tab-colab { padding: 8px 18px; background: var(--bg-element); border: 1px solid #333; color: var(--text-gray); border-radius: var(--radius-pill); cursor: pointer; font-weight: 700; font-size: 11px; text-transform: uppercase; white-space: nowrap; transition: 0.3s; }
+        /* LISTAS E SIDEBAR */
+        .nav-container { background: var(--bg-main); padding: 10px 20px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; z-index: 10; }
+        .tab-colab { padding: 8px 18px; background: var(--bg-element); border: 1px solid var(--border-color); color: var(--text-sec); border-radius: var(--radius-pill); cursor: pointer; font-weight: 700; font-size: 11px; white-space: nowrap; }
         .tab-colab.active { background: var(--alcans-orange); color: white; border-color: var(--alcans-orange); }
-        .nav-days { display: flex; padding: 10px 20px; gap: 8px; background: var(--bg-main); border-bottom: 1px solid #222; overflow-x: auto; }
-        .btn-day { padding: 8px 16px; background: transparent; border: 2px solid #333; color: var(--text-gray); border-radius: var(--radius-pill); cursor: pointer; font-size: 10px; font-weight: 800; transition: 0.3s; }
-        .btn-day.active { background: white; color: black; border-color: white; }
+        .nav-days { display: flex; padding: 10px 20px; gap: 8px; background: var(--bg-main); border-bottom: 1px solid var(--border-color); overflow-x: auto; z-index: 10; }
+        .btn-day { padding: 8px 16px; background: transparent; border: 2px solid var(--border-color); color: var(--text-sec); border-radius: var(--radius-pill); cursor: pointer; font-size: 10px; font-weight: 800; }
+        .btn-day.active { background: var(--bg-panel); color: var(--text-main); border-color: var(--text-main); }
 
         .main { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; position: relative; }
-        .sidebar { background: var(--bg-panel); display: flex; flex-direction: column; margin: 10px; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
-        .stats { padding: 20px; background: linear-gradient(135deg, rgba(254, 80, 0, 0.1), transparent); border-bottom: 1px solid #222; }
+        .sidebar { background: var(--bg-panel); display: flex; flex-direction: column; margin: 10px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); z-index: 5; }
+        .stats { padding: 20px; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); }
         .stats-time { font-size: 32px; font-weight: 900; color: var(--alcans-orange); }
         .city-list { padding: 15px; overflow-y: auto; flex: 1; }
-        
-        .city-item { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 8px; background: var(--bg-element); border-radius: var(--radius-pill); border: 1px solid #333; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; }
-        .city-item:hover { background: #2a2a2a; border-color: #555; }
-        .city-item.fixed { border-left: 6px solid var(--alcans-orange); border-radius: 12px; }
-        .city-item.locked { opacity: 0.4; pointer-events: none; border-color: transparent; }
-        .city-item.extra { border-style: dashed; border-color: #444; opacity: 0.8; }
-        .city-item.extra:hover { opacity: 1; border-style: solid; }
-        
-        .city-item input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid #555; border-radius: 50%; margin-right: 12px; display: grid; place-content: center; flex-shrink: 0; }
-        .city-item input[type="checkbox"]::before { content: ""; width: 10px; height: 10px; border-radius: 50%; transform: scale(0); background: white; transition: 0.2s; }
-        .city-item input[type="checkbox"]:checked { border-color: var(--alcans-orange); background: var(--alcans-orange); }
-        .city-item input[type="checkbox"]:checked::before { transform: scale(1); }
 
-        .extra-separator { margin: 15px 0 10px 0; padding: 10px; border-top: 1px solid #333; color: #666; font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
-        .extra-container { display: none; } .extra-container.open { display: block; }
+        .city-item { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 8px; background: var(--bg-element); border-radius: var(--radius-pill); border: 1px solid var(--border-color); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-main); transition: 0.2s; }
+        .city-item:hover { background: var(--bg-hover); border-color: var(--text-sec); }
+        .city-item.fixed { border-left: 6px solid var(--alcans-orange); border-radius: 12px; }
+        .city-item.locked { opacity: 0.5; pointer-events: none; }
+        .city-item.extra { border-style: dashed; border-color: var(--text-sec); opacity: 0.8; }
         
-        #map { flex: 1; border-radius: 20px 0 0 0; overflow: hidden; margin-top: 10px; position: relative; }
+        /* --- ESTILIZAÇÃO DO CHECKBOX CIRCULAR (NOVO) --- */
+        .city-item input[type="checkbox"] { 
+            appearance: none; -webkit-appearance: none;
+            width: 22px; height: 22px; 
+            border: 2px solid var(--text-sec); 
+            border-radius: 50%; /* Faz virar círculo */
+            margin-right: 12px; 
+            display: grid; place-content: center; 
+            flex-shrink: 0; cursor: pointer; transition: 0.2s ease;
+            background-color: transparent;
+        }
+
+        /* Checkmark (símbolo) dentro do círculo */
+        .city-item input[type="checkbox"]::before {
+            content: "\f00c"; /* Código do check do FontAwesome */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+            transform: scale(0);
+            transition: 0.2s ease;
+        }
+
+        /* Estado Selecionado */
+        .city-item input[type="checkbox"]:checked { 
+            background-color: var(--alcans-orange); 
+            border-color: var(--alcans-orange);
+        }
+        .city-item input[type="checkbox"]:checked::before { 
+            transform: scale(1); 
+        }
+
+        .extra-separator { margin: 15px 0 10px 0; padding: 10px; border-top: 1px solid var(--border-color); color: var(--text-sec); font-size: 11px; font-weight: 700; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; }
+        .extra-container { display: none; } .extra-container.open { display: block; }
+
+        #map { flex: 1; border-radius: 20px 0 0 0; overflow: hidden; margin-top: 10px; position: relative; background: #000; }
         
         #floating-controls { position: absolute; bottom: 40px; right: 40px; display: flex; gap: 15px; z-index: 100; }
-        .fab { border: none; color: white; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        .fab { border: none; color: white; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; box-shadow: 0 10px 25px var(--shadow-color); display: flex; align-items: center; justify-content: center; }
         .fab-save { height: 60px; padding: 0 30px; border-radius: 30px; background: var(--alcans-orange); gap: 10px; }
-        .fab-save.locked-state { background: #2a2a2a; color: #666; pointer-events: none; }
-        .fab-delete { width: 60px; height: 60px; border-radius: 50%; background: #2a2a2a; border: 2px solid var(--alcans-red); color: var(--alcans-red); font-size: 18px; }
+        .fab-save.locked-state { background: var(--bg-element); color: var(--text-sec); pointer-events: none; border: 1px solid var(--border-color); }
+        .fab-delete { width: 60px; height: 60px; border-radius: 50%; background: var(--bg-element); border: 2px solid var(--alcans-red); color: var(--alcans-red); font-size: 18px; }
 
-        #confirm-modal { position: absolute; bottom: 110px; right: 40px; background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 20px; width: 280px; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 2000; }
+        #confirm-modal { position: absolute; bottom: 110px; right: 40px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 20px; padding: 20px; width: 280px; opacity: 0; visibility: hidden; z-index: 2000; transition: 0.3s; box-shadow: 0 10px 30px var(--shadow-color); }
         #confirm-modal.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .btn-confirm { padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; border: none; margin-left: 5px; }
-        .btn-cancel { background: #333; color: #ccc; } .btn-danger { background: var(--alcans-red); color: white; }
-        
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); padding: 12px 30px; border-radius: var(--radius-pill); font-weight: 700; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.4s; display: flex; gap: 10px; }
+        .btn-cancel { background: var(--bg-element); color: var(--text-sec); } .btn-danger { background: var(--alcans-red); color: white; }
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); padding: 12px 30px; border-radius: var(--radius-pill); font-weight: 700; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; opacity: 0; visibility: hidden; transition: 0.4s; display: flex; gap: 10px; }
         #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
         .toast-success { background: var(--alcans-green); color: black; } .toast-delete { background: var(--alcans-red); color: white; }
-        
-        .marker-dark { display: flex; flex-direction: column; align-items: center; }
-        .dark-label { background: #111; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 6px; border: 2px solid var(--alcans-orange); }
-        .dark-icon { color: var(--alcans-orange); font-size: 30px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+
+        .marker-svg { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .marker-svg svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .marker-svg .marker-label { background: var(--bg-panel); color: var(--text-main); padding: 4px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-bottom: 2px; border: 1px solid var(--alcans-orange); white-space: nowrap; box-shadow: 0 2px 5px var(--shadow-color); }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight:900; color:var(--alcans-orange); font-size: 20px;">ALCANS <span style="font-weight:300; color:white">SYSTEM</span></div>
-    
-    <button class="btn-overview" id="btnToggleOverview" onclick="toggleOverview()">
-        <i class="fas fa-th-large"></i> Visão Geral
-    </button>
+    <div style="font-weight:900; color:var(--alcans-orange); font-size: 20px;">ALCANS <span style="font-weight:300; color:var(--text-main)">SYSTEM</span></div>
+    <div style="display:flex; align-items:center;">
+        <button class="btn-overview" id="btnToggleOverview" onclick="toggleOverview()">
+            <i class="fas fa-th-large"></i> Visão Geral
+        </button>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar Tema">
+            <i id="themeIcon" class="fas fa-moon"></i>
+        </button>
+    </div>
 </header>
 
 <div class="week-navigator">
@@ -162,7 +198,6 @@
         <span id="weekDates" class="week-dates">--/-- - --/--</span>
     </div>
     <button class="btn-nav-arrow" onclick="changeWeek(1)"><i class="fas fa-chevron-right"></i></button>
-    
     <div class="top-actions">
         <button class="btn-top" onclick="clonePreviousWeek()"><i class="fas fa-copy"></i> Copiar</button>
         <button class="btn-top btn-excel" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
@@ -176,20 +211,20 @@
     <aside class="sidebar">
         <div class="stats">
             <div id="totalTime" class="stats-time">0h 00m</div>
-            <div id="totalKm" style="color: var(--text-gray); font-size: 13px;">0.0 km</div>
+            <div id="totalKm" style="color: var(--text-sec); font-size: 13px;">0.0 km</div>
         </div>
         <div class="city-list" id="cityList"></div>
     </aside>
     
     <div id="map">
         <div id="overview-panel">
-            <h2 style="text-align:center; color:white; margin-bottom:30px">RESUMO DA ESCALA SEMANAL</h2>
+            <h2 style="text-align:center; color:var(--text-main); margin-bottom:30px">RESUMO DA ESCALA SEMANAL</h2>
             <div class="dashboard-grid" id="dashboardGrid"></div>
         </div>
 
         <div id="confirm-modal">
-            <div style="font-size:14px; font-weight:700; color:white; margin-bottom:5px">Atenção</div>
-            <div style="font-size:12px; color:#aaa; margin-bottom:15px">Excluir e desbloquear esta rota?</div>
+            <div style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:5px">Atenção</div>
+            <div style="font-size:12px; color:var(--text-sec); margin-bottom:15px">Excluir e desbloquear esta rota?</div>
             <div style="display:flex; justify-content:flex-end">
                 <button class="btn-confirm btn-cancel" onclick="closeConfirmModal()">Cancelar</button>
                 <button class="btn-confirm btn-danger" onclick="executeDelete()">Excluir</button>
@@ -211,7 +246,75 @@
     const days = ["SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA", "SÁBADO"];
     let currentWeekOffset = 0; 
     let activeWeek = getWeekRange(0);
+    let db = JSON.parse(localStorage.getItem('alcans_system_3d_v1')) || {};
     
+    // ESTILOS COM SUPORTE A 3D
+    const MAP_STYLE_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+    const MAP_STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json';
+
+    const colabs = {
+        "1": { nome: "GUSTAVO (C1)", partida: "Cajuru", cidades: ["Cajuru", "Cássia dos Coqueiros", "Santa Cruz da Esperança", "Santa Rosa de Viterbo (centro)", "Batatais", "Mococa"] },
+        "2": { nome: "QUELI (C2)", partida: "Santo Antonio da Alegria", cidades: ["Santo Antonio da Alegria", "Itamogi", "Arceburgo", "Guaxupé", "Monte Santo de Minas", "São Sebastião do Paraíso"] },
+        "3": { nome: "IGOR (C3)", partida: "Ribeirão Preto", cidades: ["Ribeirão Preto", "Guariba", "Jaboticabal", "Jardinopolis"] },
+        "4": { nome: "NOVO LÍDER (C4)", partida: "São Carlos", cidades: ["São Carlos", "Santa Rita do Passa Quatro", "Tambaú", "Santa Cruz das Palmeiras"] }
+    };
+    
+    const coords = { 
+        "Cajuru": [-47.3039, -21.2747], "Cássia dos Coqueiros": [-47.1697, -21.2811], "Santa Cruz da Esperança": [-47.4267, -21.2917], 
+        "Santa Rosa de Viterbo (centro)": [-47.3622, -21.4722], "Batatais": [-47.5847, -20.8914], "Mococa": [-47.0019, -21.4644], 
+        "Santo Antonio da Alegria": [-47.1517, -21.0872], "Itamogi": [-47.0519, -21.0711], "Arceburgo": [-46.9389, -21.3639], 
+        "Guaxupé": [-46.7111, -21.3053], "Monte Santo de Minas": [-46.9806, -21.1897], "São Sebastião do Paraíso": [-46.9914, -20.9169], 
+        "Ribeirão Preto": [-47.8103, -21.1706], "Guariba": [-48.2267, -21.3597], "Jaboticabal": [-48.3242, -21.2558], "Jardinopolis": [-47.8267, -21.0208], 
+        "São Carlos": [-47.8908, -22.0175], "Santa Rita do Passa Quatro": [-47.4772, -21.7081], "Tambaú": [-47.2736, -21.7042], "Santa Cruz das Palmeiras": [-47.2856, -21.8256] 
+    };
+
+    let currentColab = "1", currentDay = "SEGUNDA", currentSelection = [], isLocked = false, extraExpanded = false;
+    let currentTheme = localStorage.getItem('alcans_theme') || 'dark';
+
+    // Inicializa Mapa COM PITCH (3D) ATIVADO
+    const map = new maplibregl.Map({ 
+        container: 'map', 
+        style: currentTheme === 'dark' ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
+        center: [-47.3, -21.2], 
+        zoom: 9, 
+        pitch: 60, // AQUI ESTÁ O SEGREDO DO 3D
+        bearing: -10, // Leve rotação para dar mais profundidade
+        antialias: true // Melhora a qualidade das bordas no 3D
+    });
+
+    // --- FUNÇÕES DE TEMA E 3D ---
+    function initTheme() {
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-theme');
+            document.getElementById('themeIcon').classList.remove('fa-moon');
+            document.getElementById('themeIcon').classList.add('fa-sun');
+        }
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('themeIcon');
+        
+        if (body.classList.contains('light-theme')) {
+            body.classList.remove('light-theme');
+            icon.classList.remove('fa-sun'); icon.classList.add('fa-moon');
+            currentTheme = 'dark';
+            map.setStyle(MAP_STYLE_DARK);
+        } else {
+            body.classList.add('light-theme');
+            icon.classList.remove('fa-moon'); icon.classList.add('fa-sun');
+            currentTheme = 'light';
+            map.setStyle(MAP_STYLE_LIGHT);
+        }
+        localStorage.setItem('alcans_theme', currentTheme);
+        
+        // Garante que o 3D e a rota sejam redesenhados ao trocar o tema
+        map.once('style.load', () => {
+            updateMapRoute();
+        });
+    }
+
+    // --- FUNÇÕES GERAIS ---
     function getWeekRange(offset) {
         const today = new Date();
         const currentDay = today.getDay();
@@ -224,49 +327,8 @@
         return { monday, saturday, display: `${monday.getDate()}/${monday.getMonth()+1} - ${saturday.getDate()}/${saturday.getMonth()+1}`, id: weekId };
     }
 
-    let db = JSON.parse(localStorage.getItem('alcans_system_final')) || {};
-
-    const colabs = {
-        "1": { nome: "GUSTAVO (C1)", partida: "Cajuru", cidades: ["Cajuru", "Cássia dos Coqueiros", "Santa Cruz da Esperança", "Santa Rosa de Viterbo (centro)", "Batatais", "Mococa"] },
-        "2": { nome: "QUELI (C2)", partida: "Santo Antonio da Alegria", cidades: ["Santo Antonio da Alegria", "Itamogi", "Arceburgo", "Guaxupé", "Monte Santo de Minas", "São Sebastião do Paraíso"] },
-        "3": { nome: "IGOR (C3)", partida: "Ribeirão Preto", cidades: ["Ribeirão Preto", "Guariba", "Jaboticabal", "Jardinopolis"] },
-        "4": { nome: "NOVO LÍDER (C4)", partida: "São Carlos", cidades: ["São Carlos", "Santa Rita do Passa Quatro", "Tambaú", "Santa Cruz das Palmeiras"] }
-    };
-    const coords = { "Cajuru": [-47.3039, -21.2747], "Cássia dos Coqueiros": [-47.1697, -21.2811], "Santa Cruz da Esperança": [-47.4267, -21.2917], "Santa Rosa de Viterbo (centro)": [-47.3622, -21.4722], "Batatais": [-47.5847, -20.8914], "Mococa": [-47.0019, -21.4644], "Santo Antonio da Alegria": [-47.1517, -21.0872], "Itamogi": [-47.0519, -21.0711], "Arceburgo": [-46.9389, -21.3639], "Guaxupé": [-46.7111, -21.3053], "Monte Santo de Minas": [-46.9806, -21.1897], "São Sebastião do Paraíso": [-46.9914, -20.9169], "Ribeirão Preto": [-47.8103, -21.1706], "Guariba": [-48.2267, -21.3597], "Jaboticabal": [-48.3242, -21.2558], "Jardinopolis": [-47.8267, -21.0208], "São Carlos": [-47.8908, -22.0175], "Santa Rita do Passa Quatro": [-47.4772, -21.7081], "Tambaú": [-47.2736, -21.7042], "Santa Cruz das Palmeiras": [-47.2856, -21.8256] };
-
-    let currentColab = "1", currentDay = "SEGUNDA", currentSelection = [], isLocked = false, extraExpanded = false;
-    const map = new maplibregl.Map({ container: 'map', style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', center: [-47.3, -21.2], zoom: 9.5, pitch: 40 });
-
-    function toggleOverview() {
-        const panel = document.getElementById('overview-panel'); const btn = document.getElementById('btnToggleOverview');
-        if (panel.classList.contains('active')) { panel.classList.remove('active'); btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-th-large"></i> Visão Geral'; }
-        else { renderDashboard(); panel.classList.add('active'); btn.classList.add('active'); btn.innerHTML = '<i class="fas fa-times"></i> Fechar Visão'; }
-    }
-
-    function renderDashboard() {
-        const grid = document.getElementById('dashboardGrid'); grid.innerHTML = ''; const week = activeWeek.id;
-        grid.innerHTML += `<div class="dash-header">COLABORADOR</div>`;
-        days.forEach(d => grid.innerHTML += `<div class="dash-header">${d.substring(0,3)}</div>`);
-        Object.keys(colabs).forEach(cId => {
-            grid.innerHTML += `<div class="colab-row-header"><i class="fas fa-user-circle"></i> ${colabs[cId].nome.split(' ')[0]}</div>`;
-            days.forEach(day => {
-                const route = db[week]?.[cId]?.[day]; const hasRoute = route && route.length > 0;
-                const count = hasRoute ? route.length - 1 : 0;
-                grid.innerHTML += hasRoute ? 
-                    `<div class="dash-card status-active" onclick="jumpTo('${cId}', '${day}')"><div class="status-badge badge-saved"></div><div class="card-count">${count}</div><div class="card-label">Cidades</div></div>` :
-                    `<div class="dash-card" onclick="jumpTo('${cId}', '${day}')"><span class="status-empty">- LIVRE -</span></div>`;
-            });
-        });
-    }
-
-    function jumpTo(cId, day) {
-        document.getElementById('overview-panel').classList.remove('active');
-        document.getElementById('btnToggleOverview').classList.remove('active');
-        document.getElementById('btnToggleOverview').innerHTML = '<i class="fas fa-th-large"></i> Visão Geral';
-        currentColab = cId; currentDay = day; loadState(); updateUI();
-    }
-
     function initUI() {
+        initTheme();
         const colabNav = document.getElementById('colabNav'); const dayNav = document.getElementById('dayNav');
         Object.keys(colabs).forEach(id => { const btn = document.createElement('button'); btn.className = 'tab-colab'; btn.id = `c-${id}`; btn.innerText = colabs[id].nome; btn.onclick = () => { currentColab = id; loadState(); updateUI(); }; colabNav.appendChild(btn); });
         days.forEach(d => { const btn = document.createElement('button'); btn.className = 'btn-day'; btn.id = `d-${d}`; btn.innerText = d.substring(0,3); btn.onclick = () => { currentDay = d; loadState(); updateUI(); }; dayNav.appendChild(btn); });
@@ -280,7 +342,6 @@
         loadState(); updateUI();
         if(document.getElementById('overview-panel').classList.contains('active')) renderDashboard();
     }
-    function changeWeek(dir) { currentWeekOffset += dir; updateWeekDisplay(); }
 
     function loadState() {
         const week = activeWeek.id;
@@ -289,81 +350,82 @@
         if (savedData && savedData.length > 0) { currentSelection = [...savedData]; isLocked = true; } else { currentSelection = [colabs[currentColab].partida]; isLocked = false; }
     }
 
-    function saveCurrentRoute() {
-        if (isLocked) return;
-        const week = activeWeek.id; if (!db[week]) db[week] = {}; if (!db[week][currentColab]) db[week][currentColab] = {};
-        db[week][currentColab][currentDay] = [...currentSelection];
-        localStorage.setItem('alcans_system_final', JSON.stringify(db));
-        isLocked = true; renderCities(); updateButtons(); showToast("Rota Salva!", "success");
-    }
+    let markers = [];
+    async function updateMapRoute() {
+        markers.forEach(m => m.remove()); markers = [];
 
-    function executeDelete() {
-        closeConfirmModal(); const week = activeWeek.id;
-        if(db[week] && db[week][currentColab]) delete db[week][currentColab][currentDay];
-        localStorage.setItem('alcans_system_final', JSON.stringify(db));
-        currentSelection = [colabs[currentColab].partida]; isLocked = false;
-        renderCities(); updateMapRoute(); updateButtons(); showToast("Rota Excluída!", "delete");
-    }
-
-    function clonePreviousWeek() {
-        const currentWeekId = activeWeek.id; const prevWeekInfo = getWeekRange(currentWeekOffset - 1);
-        if (!db[prevWeekInfo.id]) { showToast("Sem dados anteriores.", "delete"); return; }
-        if(!confirm("Copiar semana anterior?")) return;
-        db[currentWeekId] = JSON.parse(JSON.stringify(db[prevWeekInfo.id]));
-        localStorage.setItem('alcans_system_final', JSON.stringify(db));
-        loadState(); updateUI(); showToast("Cópia realizada!", "success");
-    }
-
-    function exportToExcel() {
-        const weekId = activeWeek.id; const reportData = [];
-        Object.keys(colabs).forEach(cId => {
-            const colabData = db[weekId]?.[cId] || {};
-            days.forEach(day => {
-                const route = colabData[day] || ["-"];
-                if(route.length > 1) { reportData.push({ "Colaborador": colabs[cId].nome, "Semana": activeWeek.display, "Dia": day, "Rota": route.join(" > "), "Cidades": route.length - 1 }); }
-            });
+        currentSelection.forEach(c => {
+            if(coords[c]) {
+                const el = document.createElement('div'); el.className = 'marker-svg';
+                el.innerHTML = `
+                    <div class="marker-label">${c}</div>
+                    <svg viewBox="0 0 24 24" fill="#FE5000">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>`;
+                markers.push(new maplibregl.Marker({element: el, anchor: 'bottom'}).setLngLat(coords[c]).addTo(map));
+            }
         });
-        if (reportData.length === 0) { showToast("Sem dados para exportar.", "delete"); return; }
-        const worksheet = XLSX.utils.json_to_sheet(reportData); const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Geral Semanal");
-        XLSX.writeFile(workbook, `Planejamento_Geral_${weekId}.xlsx`); showToast("Excel baixado!", "success");
+
+        if (currentSelection.length < 2) { 
+            if(map.getSource('route')) map.getSource('route').setData({type:'FeatureCollection',features:[]}); 
+            document.getElementById('totalTime').innerText="0h 00m"; document.getElementById('totalKm').innerText="0.0 km"; 
+            return; 
+        }
+
+        const validCoords = currentSelection.filter(c => coords[c]).map(c => coords[c]);
+        const waypointsStr = validCoords.map(c => `${c[0]},${c[1]}`).join(';');
+        
+        try {
+            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${waypointsStr}?overview=full&geometries=geojson`);
+            const data = await res.json();
+            
+            if(data.routes && data.routes[0]) {
+                const r = data.routes[0];
+                updateRouteLayer(r.geometry);
+                document.getElementById('totalTime').innerText = Math.floor(r.duration/3600)+"h "+Math.floor((r.duration%3600)/60)+"m";
+                document.getElementById('totalKm').innerHTML = `<i class="fas fa-route"></i> ${(r.distance/1000).toFixed(1)} km`;
+                const b = r.geometry.coordinates.reduce((bb, cc) => bb.extend(cc), new maplibregl.LngLatBounds(r.geometry.coordinates[0], r.geometry.coordinates[0]));
+                map.fitBounds(b, {padding:80});
+            } else { throw new Error("Sem rota"); }
+        } catch(e) {
+            const lineGeo = { type: 'LineString', coordinates: validCoords };
+            updateRouteLayer(lineGeo);
+            document.getElementById('totalTime').innerText = "--"; document.getElementById('totalKm').innerText = "--";
+        }
     }
 
+    function updateRouteLayer(geo) {
+        if(map.getSource('route')) {
+            map.getSource('route').setData(geo);
+        } else {
+            map.addSource('route', { type: 'geojson', data: geo });
+            map.addLayer({
+                id: 'route', type: 'line', source: 'route',
+                layout: { 'line-join': 'round', 'line-cap': 'round' },
+                paint: { 'line-color': '#FE5000', 'line-width': 5, 'line-opacity': 0.9 }
+            });
+        }
+    }
+
+    function changeWeek(dir) { currentWeekOffset += dir; updateWeekDisplay(); }
     function toggleCity(c) { if(isLocked) return; const i = currentSelection.indexOf(c); i > -1 ? currentSelection.splice(i,1) : currentSelection.push(c); renderCities(); updateButtons(); updateMapRoute(); }
+    function saveCurrentRoute() { if (isLocked) return; const w = activeWeek.id; if (!db[w]) db[w] = {}; if (!db[w][currentColab]) db[w][currentColab] = {}; db[w][currentColab][currentDay] = [...currentSelection]; localStorage.setItem('alcans_system_3d_v1', JSON.stringify(db)); isLocked = true; renderCities(); updateButtons(); showToast("Rota Salva!", "success"); }
+    function executeDelete() { closeConfirmModal(); const w = activeWeek.id; if(db[w] && db[w][currentColab]) delete db[w][currentColab][currentDay]; localStorage.setItem('alcans_system_3d_v1', JSON.stringify(db)); currentSelection = [colabs[currentColab].partida]; isLocked = false; renderCities(); updateMapRoute(); updateButtons(); showToast("Rota Excluída!", "delete"); }
+    function clonePreviousWeek() { const cur = activeWeek.id; const prev = getWeekRange(currentWeekOffset - 1).id; if (!db[prev]) { showToast("Sem dados anteriores.", "delete"); return; } if(!confirm("Copiar semana anterior?")) return; db[cur] = JSON.parse(JSON.stringify(db[prev])); localStorage.setItem('alcans_system_3d_v1', JSON.stringify(db)); loadState(); updateUI(); showToast("Cópia realizada!", "success"); }
+    function exportToExcel() { const w = activeWeek.id; const d = []; Object.keys(colabs).forEach(cId => { const cData = db[w]?.[cId] || {}; days.forEach(day => { const r = cData[day] || ["-"]; if(r.length > 1) d.push({ "Colaborador": colabs[cId].nome, "Semana": activeWeek.display, "Dia": day, "Rota": r.join(" > "), "Cidades": r.length - 1 }); }); }); if (d.length === 0) { showToast("Sem dados.", "delete"); return; } const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Geral"); XLSX.writeFile(wb, `Alcans_${w}.xlsx`); showToast("Excel baixado!", "success"); }
+    
+    function toggleOverview() { const p = document.getElementById('overview-panel'); const b = document.getElementById('btnToggleOverview'); if (p.classList.contains('active')) { p.classList.remove('active'); b.classList.remove('active'); b.innerHTML = '<i class="fas fa-th-large"></i> Visão Geral'; } else { renderDashboard(); p.classList.add('active'); b.classList.add('active'); b.innerHTML = '<i class="fas fa-times"></i> Fechar Visão'; } }
+    function renderDashboard() { const g = document.getElementById('dashboardGrid'); g.innerHTML = ''; const w = activeWeek.id; g.innerHTML += `<div class="dash-header">COLAB</div>`; days.forEach(d => g.innerHTML += `<div class="dash-header">${d.substring(0,3)}</div>`); Object.keys(colabs).forEach(cId => { g.innerHTML += `<div class="colab-row-header"><i class="fas fa-user-circle"></i> ${colabs[cId].nome.split(' ')[0]}</div>`; days.forEach(day => { const r = db[w]?.[cId]?.[day]; const has = r && r.length > 0; g.innerHTML += has ? `<div class="dash-card status-active" onclick="jumpTo('${cId}', '${day}')"><div class="status-badge badge-saved"></div><div class="card-count">${r.length-1}</div><div class="card-label">Cidades</div></div>` : `<div class="dash-card" onclick="jumpTo('${cId}', '${day}')"><span class="status-empty">-</span></div>`; }); }); }
+    function jumpTo(cId, day) { document.getElementById('overview-panel').classList.remove('active'); document.getElementById('btnToggleOverview').classList.remove('active'); document.getElementById('btnToggleOverview').innerHTML = '<i class="fas fa-th-large"></i> Visão Geral'; currentColab = cId; currentDay = day; loadState(); updateUI(); }
+    
+    function renderCities() { const l = document.getElementById('cityList'); l.innerHTML = ""; const p = colabs[currentColab].cidades; p.forEach(c => createCityItem(c, l, false)); const s = document.createElement('div'); s.className = 'extra-separator'; s.innerHTML = `<span><i class="fas fa-globe"></i> Outras Regiões</span> <i class="fas fa-chevron-down"></i>`; s.onclick = () => { extraExpanded = !extraExpanded; document.getElementById('extraContainer').style.display = extraExpanded ? 'block' : 'none'; }; l.appendChild(s); const e = document.createElement('div'); e.id = 'extraContainer'; e.style.display = extraExpanded ? 'block' : 'none'; Object.keys(coords).sort().forEach(c => { if(!p.includes(c)) createCityItem(c, e, true); }); l.appendChild(e); updateButtons(); }
+    function createCityItem(c, p, isE) { const isP = c === colabs[currentColab].partida; const l = document.createElement('label'); let cls = `city-item ${isP?'fixed':''} ${isLocked?'locked':''} ${isE?'extra':''}`; if(isE && currentSelection.includes(c)) cls += ' selected-extra'; l.className = cls; l.innerHTML = `<input type="checkbox" ${currentSelection.includes(c)?'checked':''} ${isP||isLocked?'disabled':''} onchange="toggleCity('${c}')"> ${c}`; p.appendChild(l); }
+    function updateButtons() { const b = document.getElementById('btnSave'); if(isLocked) { b.innerHTML = '<i class="fas fa-lock"></i> <span>BLOQUEADA</span>'; b.className = 'fab fab-save locked-state'; } else { b.innerHTML = '<i class="fas fa-save"></i> <span>SALVAR</span>'; b.className = 'fab fab-save'; } }
+    function updateUI() { document.querySelectorAll('.tab-colab').forEach(b => b.classList.toggle('active', b.id === `c-${currentColab}`)); document.querySelectorAll('.btn-day').forEach(b => b.classList.toggle('active', b.id === `d-${currentDay}`)); renderCities(); updateMapRoute(); }
     function openConfirmModal() { if(!isLocked) { showToast("Nada para excluir", "delete"); return; } document.getElementById('confirm-modal').classList.add('show'); }
     function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('show'); }
     function showToast(m, t) { const el = document.getElementById('toast'); el.className = ''; el.classList.add(t === 'success' ? 'toast-success' : 'toast-delete'); el.innerHTML = `<i class="fas fa-${t==='success'?'check-circle':'trash-alt'}"></i> ${m}`; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); }
-    function updateButtons() { const b = document.getElementById('btnSave'); if(isLocked) { b.innerHTML = '<i class="fas fa-lock"></i> <span>BLOQUEADA</span>'; b.className = 'fab fab-save locked-state'; } else { b.innerHTML = '<i class="fas fa-save"></i> <span>SALVAR</span>'; b.className = 'fab fab-save'; } }
-    function toggleExtra() { extraExpanded = !extraExpanded; const c = document.getElementById('extraContainer'); extraExpanded ? c.classList.add('open') : c.classList.remove('open'); }
 
-    function renderCities() {
-        const list = document.getElementById('cityList'); list.innerHTML = "";
-        const primary = colabs[currentColab].cidades;
-        primary.forEach(c => createCityItem(c, list, false));
-        const sep = document.createElement('div'); sep.className = 'extra-separator'; sep.innerHTML = `<span><i class="fas fa-globe"></i> Outras Regiões</span> <i class="fas fa-chevron-down"></i>`; sep.onclick = toggleExtra; list.appendChild(sep);
-        const extra = document.createElement('div'); extra.id = 'extraContainer'; extra.className = extraExpanded ? 'extra-container open' : 'extra-container';
-        Object.keys(coords).sort().forEach(c => { if(!primary.includes(c)) createCityItem(c, extra, true); });
-        list.appendChild(extra);
-    }
-    function createCityItem(c, p, isE) {
-        const isP = c === colabs[currentColab].partida; const l = document.createElement('label');
-        let cls = `city-item ${isP?'fixed':''} ${isLocked?'locked':''} ${isE?'extra':''}`;
-        if(isE && currentSelection.includes(c)) cls += ' selected-extra'; l.className = cls;
-        l.innerHTML = `<input type="checkbox" ${currentSelection.includes(c)?'checked':''} ${isP||isLocked?'disabled':''} onchange="toggleCity('${c}')"> ${c}`; p.appendChild(l);
-    }
-    async function updateMapRoute() {
-        markers.forEach(m => m.remove()); markers = [];
-        currentSelection.forEach(c => { const el = document.createElement('div'); el.className = 'marker-dark'; el.innerHTML = `<div class="dark-label">${c}</div><div class="dark-icon"><i class="fas fa-map-marker-alt"></i></div>`; markers.push(new maplibregl.Marker({element: el, anchor: 'bottom'}).setLngLat(coords[c]).addTo(map)); });
-        if (currentSelection.length < 2) { if(map.getSource('route')) map.getSource('route').setData({type:'FeatureCollection',features:[]}); document.getElementById('totalTime').innerText="0h 00m"; document.getElementById('totalKm').innerText="0.0 km"; return; }
-        const waypoints = currentSelection.map(c => `${coords[c][0]},${coords[c][1]}`).join(';');
-        try { const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`); const data = await res.json(); 
-            if(data.routes && data.routes[0]) { const r = data.routes[0]; 
-                if(map.getSource('route')) map.getSource('route').setData(r.geometry); else { map.addSource('route',{type:'geojson',data:r.geometry}); map.addLayer({id:'route',type:'line',source:'route',paint:{'line-color':'#FE5000','line-width':6,'line-opacity':0.9}}); }
-                document.getElementById('totalTime').innerText = Math.floor(r.duration/3600)+"h "+Math.floor((r.duration%3600)/60)+"m"; document.getElementById('totalKm').innerHTML = `<i class="fas fa-route"></i> ${(r.distance/1000).toFixed(1)} km`;
-                const b = r.geometry.coordinates.reduce((bb, cc) => bb.extend(cc), new maplibregl.LngLatBounds(r.geometry.coordinates[0], r.geometry.coordinates[0])); map.fitBounds(b, {padding:80, pitch:40});
-            } } catch(e){}
-    }
-    function updateUI() { document.querySelectorAll('.tab-colab').forEach(b => b.classList.toggle('active', b.id === `c-${currentColab}`)); document.querySelectorAll('.btn-day').forEach(b => b.classList.toggle('active', b.id === `d-${currentDay}`)); renderCities(); updateMapRoute(); }
     map.on('load', initUI);
 </script>
 </body>
